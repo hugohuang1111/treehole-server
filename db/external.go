@@ -2,7 +2,10 @@ package db
 
 import (
 	"github.com/golang/glog"
+	"github.com/hugohuang1111/treehole/constants"
 	"github.com/hugohuang1111/treehole/module"
+	"github.com/hugohuang1111/treehole/router"
+	"github.com/hugohuang1111/treehole/utils"
 )
 
 const (
@@ -43,6 +46,7 @@ func (db *DB) OnMail(mail *module.Mail) {
 //OnProcess process event
 func (db *DB) OnProcess(mail *module.Mail) {
 	// connID := module.GetConnectID(mail)
+	errVal := constants.ErrSuccess
 	switch mail.Type {
 	case module.MailTypeNormal:
 		cmd := module.GetCmd(mail)
@@ -50,16 +54,27 @@ func (db *DB) OnProcess(mail *module.Mail) {
 		case DBCmdSavedWord:
 			word := module.GetPayloadValueString(mail, "word")
 			nickName := module.GetPayloadValueString(mail, "nickName")
-			saveword(nickName, word)
+			if err := saveword(nickName, word); nil != err {
+				errVal = 1
+			}
 		case DBCmdTopWords:
 			start := module.GetPayloadValueInt(mail, "start")
 			length := module.GetPayloadValueInt(mail, "length")
 			topword(start, length)
 		default:
+			errVal = constants.ErrUnknowCmd
 			glog.Warning("DB unhandler mail cmd:", cmd)
 		}
 	default:
+		errVal = constants.ErrUnknowCmd
 		glog.Warning("DB unhandler mail type:", mail.Type)
 	}
 
+	respMail := new(module.Mail)
+	respMail.Sender = constants.ModDB
+	respMail.Recver = constants.ModGate
+	respMail.Type = module.MailTypeNormal
+	respMail.Payload = utils.CloneMap(mail.Payload)
+	respMail.Payload[module.PayloadKeyError] = errVal
+	router.Route(respMail)
 }

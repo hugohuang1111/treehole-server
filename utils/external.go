@@ -36,3 +36,13 @@ func GetInterfaceFromMap(m map[string]interface{}, key string) interface{} {
 
 	return nil
 }
+
+// CloneMap clone map
+func CloneMap(m map[string]interface{}) map[string]interface{} {
+	n := make(map[string]interface{})
+	for k, v := range m {
+		n[k] = v
+	}
+
+	return n
+}

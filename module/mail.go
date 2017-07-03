@@ -3,20 +3,24 @@ package module
 const (
 	//PayloadKeySession session
 	PayloadKeySession = "session"
-	//PayloadKeyRecvData session
+	//PayloadKeyRecvData recv data
 	PayloadKeyRecvData = "recvData"
-	//PayloadKeySendData session
+	//PayloadKeySendData send data
 	PayloadKeySendData = "sendData"
 	//PayloadKeyCmd cmd
 	PayloadKeyCmd = "cmd"
-	//PayloadKeyConnectID session
+	//PayloadKeyConnectID connect id
 	PayloadKeyConnectID = "connectID"
-	//PayloadKeyUserID session
+	//PayloadKeyUserID user id
 	PayloadKeyUserID = "userID"
-	//PayloadKeyRoomID session
+	//PayloadKeyRoomID room id
 	PayloadKeyRoomID = "roomID"
-	//PayloadKeyCustom session
+	//PayloadKeyCustom custom
 	PayloadKeyCustom = "custom"
+	//PayloadKeyError error vaule
+	PayloadKeyError = "error"
+	//PayloadKeyDescription error description
+	PayloadKeyDescription = "description"
 )
 
 const (
