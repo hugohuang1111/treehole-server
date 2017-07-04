@@ -2,10 +2,7 @@ package gate
 
 import (
 	"github.com/golang/glog"
-	"github.com/hugohuang1111/treehole/constants"
 	"github.com/hugohuang1111/treehole/gate/internal"
-	"github.com/hugohuang1111/treehole/module"
-	"github.com/hugohuang1111/treehole/router"
 )
 
 var (
@@ -26,13 +23,13 @@ func newConnect() internal.Connect {
 func disConnect(connID uint64) {
 	delete(connMap, connID)
 
-	m := new(module.Mail)
-	m.Recver = constants.ModGate
-	m.Sender = constants.ModGate
-	m.Type = module.MailTypeDisconnect
-	m.Payload = make(map[string]interface{})
-	m.Payload[module.PayloadKeyConnectID] = connID
-	router.Route(m)
+	// m := new(module.Mail)
+	// m.Recver = constants.ModGate
+	// m.Sender = constants.ModGate
+	// m.Type = module.MailTypeDisconnect
+	// m.Payload = make(map[string]interface{})
+	// m.Payload[module.PayloadKeyConnectID] = connID
+	// router.Route(m)
 }
 
 func handSendData(connID uint64, payload []byte) {

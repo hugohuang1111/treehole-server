@@ -30,8 +30,8 @@ const (
 	MailTypeClient = "client"
 	//MailTypeDisconnect disconnect
 	MailTypeDisconnect = "disconnect"
-	//MailTypeSend send
-	MailTypeSend = "send"
+	//MailTypeSendToClient send
+	MailTypeSendToClient = "sendToClient"
 	//MailTypeNormal normal
 	MailTypeNormal = "normal"
 )
@@ -57,6 +57,17 @@ func GetSendData(mail *Mail) interface{} {
 //GetConnectID get connect id
 func GetConnectID(mail *Mail) uint64 {
 	return GetPayloadValueUint64(mail, PayloadKeyConnectID)
+}
+
+//GetPayloadValueStringArr get string array
+func GetPayloadValueStringArr(mail *Mail, key string) []string {
+	v := GetPayloadValue(mail, key)
+
+	if strArr, ok := v.([]string); ok {
+		return strArr
+	}
+
+	return []string{}
 }
 
 //GetPayloadValueString get payload string value

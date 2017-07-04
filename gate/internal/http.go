@@ -57,7 +57,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 			select {
 			case data := <-c.SendChan():
 				w.Write(data)
-				c.CloseSig() <- true
+				runFlag = false
 			case <-c.CloseSig():
 				runFlag = false
 			}

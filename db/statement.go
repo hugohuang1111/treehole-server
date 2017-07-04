@@ -67,7 +67,28 @@ func (stmt *statement) columns(fields ...string) *statement {
 
 // Values sql insert values
 func (stmt *statement) values(vals ...string) *statement {
-	stmt.sql = fmt.Sprintf("%s VALUES (%s)", stmt.sql, strings.Join(vals, ","))
+	for i, s := range vals {
+		vals[i] = strings.Replace(s, "'", "\\'", -1)
+	}
+	s := strings.Join(vals, "','")
+	s = "'" + s + "'"
+	stmt.sql = fmt.Sprintf("%s VALUES (%s)", stmt.sql, s)
+	return stmt
+}
+
+func (stmt *statement) orderBy(col string, asc bool) *statement {
+	order := "DESC"
+	if asc {
+		order = "ASC"
+	}
+	stmt.sql = fmt.Sprintf("%s ORDER BY %s %s", stmt.sql, col, order)
+	return stmt
+}
+
+func (stmt *statement) limit(n ...int) *statement {
+	stmt.sql = fmt.Sprintf("%s LIMIT %s",
+		stmt.sql,
+		strings.Trim(strings.Replace(fmt.Sprint(n), " ", ",", -1), "[]"))
 	return stmt
 }
 

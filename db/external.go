@@ -8,14 +8,6 @@ import (
 	"github.com/hugohuang1111/treehole/utils"
 )
 
-const (
-	//DBCmdSavedWord saved word
-	DBCmdSavedWord = "saved word"
-
-	//DBCmdTopWords top word
-	DBCmdTopWords = "top words"
-)
-
 //DB db module
 type DB struct {
 	skelection module.Skelecton
@@ -45,22 +37,28 @@ func (db *DB) OnMail(mail *module.Mail) {
 
 //OnProcess process event
 func (db *DB) OnProcess(mail *module.Mail) {
-	// connID := module.GetConnectID(mail)
+	respMail := new(module.Mail)
+	respMail.Payload = utils.CloneMap(mail.Payload)
+
 	errVal := constants.ErrSuccess
 	switch mail.Type {
 	case module.MailTypeNormal:
 		cmd := module.GetCmd(mail)
 		switch cmd {
-		case DBCmdSavedWord:
+		case constants.CmdDBSaveWord:
 			word := module.GetPayloadValueString(mail, "word")
 			nickName := module.GetPayloadValueString(mail, "nickName")
 			if err := saveword(nickName, word); nil != err {
 				errVal = 1
 			}
-		case DBCmdTopWords:
+		case constants.CmdDBTopWords:
 			start := module.GetPayloadValueInt(mail, "start")
 			length := module.GetPayloadValueInt(mail, "length")
-			topword(start, length)
+			if words, err := topword(start, length); nil == err {
+				respMail.Payload["words"] = words
+			} else {
+				respMail.Payload[module.PayloadKeyDescription] = err.Error()
+			}
 		default:
 			errVal = constants.ErrUnknowCmd
 			glog.Warning("DB unhandler mail cmd:", cmd)
@@ -70,11 +68,9 @@ func (db *DB) OnProcess(mail *module.Mail) {
 		glog.Warning("DB unhandler mail type:", mail.Type)
 	}
 
-	respMail := new(module.Mail)
 	respMail.Sender = constants.ModDB
 	respMail.Recver = constants.ModGate
-	respMail.Type = module.MailTypeNormal
-	respMail.Payload = utils.CloneMap(mail.Payload)
+	respMail.Type = module.MailTypeSendToClient
 	respMail.Payload[module.PayloadKeyError] = errVal
 	router.Route(respMail)
 }

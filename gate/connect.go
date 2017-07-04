@@ -5,7 +5,6 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/hugohuang1111/treehole/constants"
-	"github.com/hugohuang1111/treehole/db"
 	"github.com/hugohuang1111/treehole/module"
 	"github.com/hugohuang1111/treehole/router"
 	"github.com/hugohuang1111/treehole/utils"
@@ -67,16 +66,22 @@ func (c *connect) work() {
 		switch cmd {
 		case "express":
 			m.Recver = constants.ModDB
-			m.Payload["cmd"] = db.DBCmdSavedWord
-			m.Payload["word"] = utils.GetStringFromMap(msg, "word")
-			m.Payload["nickName"] = utils.GetStringFromMap(msg, "nickName")
+			m.Payload["cmd"] = constants.CmdDBSaveWord
+			word := utils.GetStringFromMap(msg, "word")
+			nickName := utils.GetStringFromMap(msg, "nickName")
+			if 0 == len(word) || 0 == len(nickName) {
+				m.Payload[module.PayloadKeyError] = constants.ErrParamWrong
+				m.Recver = constants.ModGate
+				m.Type = module.MailTypeSendToClient
+			} else {
+				m.Payload["word"] = word
+				m.Payload["nickName"] = nickName
+			}
 		case "topexpress":
 			m.Recver = constants.ModDB
-			m.Payload["cmd"] = db.DBCmdTopWords
+			m.Payload["cmd"] = constants.CmdDBTopWords
 			m.Payload["start"] = utils.GetIntFromMap(msg, "start")
 			m.Payload["length"] = utils.GetIntFromMap(msg, "length")
-			glog.Info(msg)
-			glog.Info(m.Payload)
 		default:
 			glog.Info("Gate unhandler connect cmd ", cmd)
 			continue

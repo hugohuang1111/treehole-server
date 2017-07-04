@@ -120,5 +120,5 @@ func Exec(statement string, args ...string) (bool, error) {
 		return false, err
 	}
 
-	return false, nil
+	return true, nil
 }

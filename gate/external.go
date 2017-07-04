@@ -1,7 +1,10 @@
 package gate
 
 import (
+	"encoding/json"
+
 	"github.com/golang/glog"
+	"github.com/hugohuang1111/treehole/constants"
 	"github.com/hugohuang1111/treehole/gate/internal"
 	"github.com/hugohuang1111/treehole/module"
 )
@@ -39,13 +42,28 @@ func (g *Gate) OnMail(mail *module.Mail) {
 
 //OnProcess process event
 func (g *Gate) OnProcess(mail *module.Mail) {
-	connID := module.GetConnectID(mail)
 	switch mail.Type {
-	case module.MailTypeSend:
-		{
-			if clientData := module.GetSendData(mail); nil != clientData {
-				g.sendToClient(connID, clientData)
-			}
+	case module.MailTypeSendToClient:
+		connID := module.GetConnectID(mail)
+		cmd := module.GetPayloadValueString(mail, module.PayloadKeyCmd)
+		sendMap := make(map[string]interface{})
+		switch cmd {
+		case constants.CmdDBTopWords:
+			sendMap["words"] = module.GetPayloadValueStringArr(mail, "words")
+			fallthrough
+		case constants.CmdDBSaveWord:
+			e := module.GetPayloadValueInt(mail, module.PayloadKeyError)
+			sendMap["error"] = e
+			sendMap["description"] = constants.ErrorDescription[e]
+			sendMap["words"] = module.GetPayloadValue(mail, "words")
+		default:
+			sendMap["error"] = constants.ErrFailed
+			sendMap["description"] = constants.ErrorDescription[constants.ErrFailed]
+			glog.Warning("Gate unknow cmd:", cmd)
+		}
+
+		if bytes, err := json.Marshal(sendMap); nil == err {
+			g.sendToClient(connID, bytes)
 		}
 	default:
 		glog.Warning("Gate unknow mail type:", mail.Type)
